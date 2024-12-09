@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int     @id @default(autoincrement())
+  name       String
+  email      String  @unique
+  password   String
+  createdAt  DateTime @default(now())
+  blogs      Blog[]
+  comments   Comment[]
+}
+
+model Blog {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  authorId   Int                                                         //  store the foreign key referencing User.id
+  author     User     @relation(fields: [authorId], references: [id])    // establish the foreign key relationship between Blog and User
+  comments   Comment[]
+}
+
+// A foreign key is a column or a set of columns in a database table that establishes a link between the data in two tables.
+
+
+
+// There won't be a direct author field in the underlying Blog database table. The author field in the Blog model is a virtual relationship
+// field provided by Prisma to simplify querying. It is not persisted as a column in the database.
+
+// In the actual database:
+// The Blog table will have an authorId column that stores the foreign key referencing the id column of the User table.
+// The author field is used in Prisma queries for accessing the related User object but does not exist as a column in the database.
+// Similarly, The blogs field in the User model is a virtual relationship field in Prisma
+
+
+
+// You can query all blogs for a specific user like this:
+// const userWithBlogs = await prisma.user.findUnique({
+//   where: { id: 1 },
+//   include: { blogs: true },
+// });
+
+// The line include: { blogs: true } in a Prisma query is significant because it tells Prisma to fetch the related blogs (from the Blog model) when retrieving data about a User. Without this line, Prisma would only return the fields directly defined in the User model.
+// Significance of include: { blogs: true }
+// By including { blogs: true }, Prisma performs a join query to fetch both the User and their associated Blog records in a single query.
+// This avoids making multiple queries to the database, which would be necessary if you fetched the User first and then queried their blogs separately.
+// The result will include an additional blogs field that contains an array of the related Blog objects.
+
+// When to Use
+// Use include: { blogs: true } when you need both the User and their associated Blog data in the same operation.
+// If you only need the User data and not their blogs, omitting this line reduces the query's complexity and processing time.
+
+
+
+// You can query the author relationship like this:
+// const blogWithAuthor = await prisma.blog.findUnique({
+//   where: { id: 1 },
+//   include: { author: true },
+// });
+
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now()) 
+  userId    Int    
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blogId    Int
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+}
+
+
