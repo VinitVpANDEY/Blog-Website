@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { blogAPI } from "../services/api";
 import UserBlogItem from "../components/Blog/UserBlogItem";
+import { useTheme } from "../context/ThemeContext";
 
 interface Blog {
   id: string;
@@ -16,6 +17,7 @@ const UserBlogsPage = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { theme } = useTheme();
   const navigate = useNavigate();
 
   const fetchBlogs = async () => {
@@ -61,10 +63,10 @@ const UserBlogsPage = () => {
   }
 
   return (
-    <div className="bg-gray-900 min-h-screen text-white p-6">
-      <h1 className="text-3xl font-bold mb-6">My Blogs</h1>
+    <div className={`min-h-screen p-6 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
+      <h1 className={`text-3xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-black"}`}>My Blogs</h1>
       {blogs.length === 0 ? (
-        <p className="text-lg">You have not written any blogs yet.</p>
+        <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}>You have not written any blogs yet.</p>
       ) : (
         <ul className="space-y-6">
           {blogs.map((blog) => (

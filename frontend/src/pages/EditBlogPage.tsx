@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { blogAPI } from "../services/api";
 import EditBlog from "../components/Blog/EditBlog";
+import { useTheme } from "../context/ThemeContext"; // Assuming you have a ThemeContext for managing theme
 
 interface Blog {
   title: string;
@@ -14,6 +15,7 @@ const EditBlogPage = () => {
   const [blog, setBlog] = useState<Blog>({ title: "", content: "" });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { theme } = useTheme();  // Get the current theme (light/dark)
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -52,8 +54,28 @@ const EditBlogPage = () => {
   }
 
   return (
-    <div>
-      <EditBlog blog={blog} onSave={handleUpdate}  error={error} />
+    <div
+      className={`min-h-screen p-6 ${
+        theme === "dark" ? "bg-gray-800 text-gray-200" : "bg-white text-gray-900"
+      }`}
+    >
+      <h1
+        className={`text-3xl font-bold mb-6 ${
+          theme === "dark" ? "text-gray-200" : "text-gray-900"
+        }`}
+      >
+        Edit Blog
+      </h1>
+      {error && (
+        <p className={`text-red-500 ${theme === "dark" ? "text-red-400" : ""} mb-4`}>
+          {error}
+        </p>
+      )}
+      <EditBlog
+        blog={blog}
+        onSave={handleUpdate}
+        error={error}
+      />
     </div>
   );
 };
